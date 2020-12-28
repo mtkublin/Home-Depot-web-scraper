@@ -1,6 +1,6 @@
 import os
 import json
-import products
+import requests
 from scrapy import Request
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
@@ -51,14 +51,14 @@ class ProductsSpider(CrawlSpider):
         nav_param = response.url.split("N-")[-1]
 
         for store_loc, store_id in stores.STORES.items():
-            products = [self.transform_product(prod)
-                        for prod in self.fetch_products(nav_param, store_id, sub_department)
-                        if prod]
+            prdcts = [self.transform_product(prod)
+                      for prod in self.fetch_products(nav_param, store_id, sub_department)
+                      if prod]
 
             with open(os.path.join(self.result_dir, f"{store_loc}_{sub_department}_{brand}.json"), "w") as f:
-                json.dump([dict(p) for p in products], f)
+                json.dump([dict(p) for p in prdcts], f)
 
-            yield {'products': products}
+            yield {'products': prdcts}
 
     def fetch_products(self, nav_param, store_id, sub_department, page_size=48):
         """
@@ -71,9 +71,9 @@ class ProductsSpider(CrawlSpider):
         :param page_size: int - number of results; maximum value is 48
         :return: list[dict] - list of products' data
         """
-        products, start_index, current_size = list(), 0, page_size
+        prdcts, start_index, current_size = list(), 0, page_size
         while current_size >= page_size:
-            req = products.post(
+            req = requests.post(
                 f'{self.base_url}/product-information/model',
                 headers={
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
@@ -93,9 +93,9 @@ class ProductsSpider(CrawlSpider):
             )
             current_products = req.json()['data']['searchModel']['products']
             current_size = len(current_products)
-            products.extend(current_products)
+            prdcts.extend(current_products)
             start_index += page_size
-        return products
+        return prdcts
 
     @staticmethod
     def transform_product(product_data):
