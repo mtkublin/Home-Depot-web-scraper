@@ -5,7 +5,7 @@ from scrapy import Request
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from ..items import ProductItem
-from ..data import stores, brands, query_string
+from ..settings import USER_AGENT, BRANDS, STORES
 
 
 class ProductsSpider(CrawlSpider):
@@ -28,7 +28,7 @@ class ProductsSpider(CrawlSpider):
     rules = (
         Rule(
             LinkExtractor(
-                allow=tuple([f"{b['base_url']}/{brand}/" for b in brands.BRANDS.values() for brand in b['brands']])
+                allow=tuple([f"{b['base_url']}/{brand}/" for b in BRANDS.values() for brand in b['brands']])
             ),
             callback="parse_item",
             follow=False),
@@ -50,7 +50,7 @@ class ProductsSpider(CrawlSpider):
         brand = response.url.split("/")[-2].split("-")[-1]
         nav_param = response.url.split("N-")[-1]
 
-        for store_loc, store_id in stores.STORES.items():
+        for store_loc, store_id in STORES.items():
             prdcts = [self.transform_product(prod)
                       for prod in self.fetch_products(nav_param, store_id, sub_department)
                       if prod]
@@ -76,13 +76,13 @@ class ProductsSpider(CrawlSpider):
             req = requests.post(
                 f'{self.base_url}/product-information/model',
                 headers={
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                    'user-agent': USER_AGENT,
                     'x-experience-name': 'major-appliances' if sub_department in {"Dishwashers",
                                                                                   "Refrigerators"} else 'hd-home'
                 },
                 json={
                     "operationName": "searchModel",
-                    "query": query_string.QUERY_STRING,
+                    "query": 'query searchModel($pageSize: Int, $startIndex: Int, $orderBy: ProductSort, $filter: ProductFilter, $storeId: String, $zipCode: String, $skipInstallServices: Boolean = true, $skipSpecificationGroup: Boolean = false, $keyword: String, $navParam: String, $storefilter: StoreFilter = ALL, $channel: Channel = DESKTOP, $additionalSearchParams: AdditionalParams) { searchModel(keyword: $keyword, navParam: $navParam, storefilter: $storefilter, storeId: $storeId, channel: $channel, additionalSearchParams: $additionalSearchParams) { metadata { categoryID analytics { semanticTokens dynamicLCA __typename } canonicalUrl searchRedirect clearAllRefinementsURL contentType cpoData { cpoCount cpoOnly totalCount __typename } isStoreDisplay productCount { inStore __typename } stores { storeId storeName address { postalCode __typename } nearByStores { storeId storeName distance address { postalCode __typename } __typename } __typename } __typename } products(pageSize: $pageSize, startIndex: $startIndex, orderBy: $orderBy, filter: $filter) { identifiers { storeSkuNumber canonicalUrl brandName modelNumber productType productLabel itemId parentId isSuperSku __typename } itemId dataSources availabilityType { discontinued type __typename } badges(storeId: $storeId) { name __typename } details { collection { collectionId name url __typename } __typename } favoriteDetail { count __typename } fulfillment(storeId: $storeId, zipCode: $zipCode) { fulfillmentOptions { type fulfillable services { type locations { inventory { isInStock isLimitedQuantity isOutOfStock isUnavailable quantity maxAllowedBopisQty minAllowedBopisQty __typename } curbsidePickupFlag isBuyInStoreCheckNearBy distance isAnchor locationId state storeName storePhone type __typename } deliveryTimeline deliveryDates { startDate endDate __typename } deliveryCharge dynamicEta { hours minutes __typename } hasFreeShipping freeDeliveryThreshold totalCharge __typename } __typename } anchorStoreStatus anchorStoreStatusType backordered backorderedShipDate bossExcludedShipStates excludedShipStates seasonStatusEligible onlineStoreStatus onlineStoreStatusType __typename } info { isBuryProduct isSponsored isGenericProduct isLiveGoodsProduct sponsoredBeacon { onClickBeacon onViewBeacon __typename } sponsoredMetadata { campaignId placementId slotId __typename } globalCustomConfigurator { customExperience __typename } returnable hidePrice productSubType { name link __typename } categoryHierarchy ecoRebate quantityLimit sskMin sskMax unitOfMeasureCoverage wasMaxPriceRange wasMinPriceRange swatches { isSelected itemId label swatchImgUrl url value __typename } totalNumberOfOptions __typename } installServices @skip(if: $skipInstallServices) { scheduleAMeasure __typename } media { images { url type subType sizes __typename } __typename } reviews { ratingsReviews { averageRating totalReviews __typename } __typename } pricing(storeId: $storeId) { value alternatePriceDisplay alternate { bulk { pricePerUnit thresholdQuantity value __typename } unit { caseUnitOfMeasure unitsOriginalPrice unitsPerCase value __typename } __typename } original mapAboveOriginalPrice message promotion { type description { shortDesc longDesc __typename } dollarOff percentageOff savingsCenter savingsCenterPromos specialBuySavings specialBuyDollarOff specialBuyPercentageOff dates { start end __typename } experienceTag __typename } specialBuy unitOfMeasure __typename } keyProductFeatures { keyProductFeaturesItems { features { name refinementId refinementUrl value __typename } __typename } __typename } specificationGroup @skip(if: $skipSpecificationGroup) { specifications { specName specValue __typename } specTitle __typename } sizeAndFitDetail { attributeGroups { attributes { attributeName dimensions __typename } dimensionLabel productType __typename } __typename } __typename } searchReport { totalProducts didYouMean correctedKeyword keyword pageSize searchUrl sortBy sortOrder startIndex __typename } relatedResults { universalSearch { title __typename } relatedServices { label __typename } visualNavs { label imageId webUrl categoryId imageURL __typename } visualNavContainsEvents relatedKeywords { keyword __typename } __typename } taxonomy { brandLinkUrl breadCrumbs { browseUrl creativeIconUrl deselectUrl dimensionId dimensionName label refinementKey url __typename } __typename } templates partialTemplates dimensions { label refinements { refinementKey label recordCount selected imgUrl url nestedRefinements { label url recordCount refinementKey __typename } __typename } collapse dimensionId isVisualNav nestedRefinementsLimit visualNavSequence __typename } orangeGraph { universalSearchArray { pods { title description imageUrl link __typename } info { title __typename } __typename } __typename } id appliedDimensions { label refinements { label refinementKey url __typename } __typename } __typename }}',
                     "variables": {
                         "navParam": nav_param,
                         "storeId": store_id,
