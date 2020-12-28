@@ -1,6 +1,6 @@
 import os
 import json
-import requests
+import products
 from scrapy import Request
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
@@ -73,7 +73,7 @@ class ProductsSpider(CrawlSpider):
         """
         products, start_index, current_size = list(), 0, page_size
         while current_size >= page_size:
-            req = requests.post(
+            req = products.post(
                 f'{self.base_url}/product-information/model',
                 headers={
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
