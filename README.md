@@ -23,8 +23,11 @@ pip install -r requirements.txt
 
 ## Usage
 #### Basic usage
-To use install requirements and run: `scrapy crawl products` in the project's directory. 
-Result files will be accessible in **results** folder.
+To use run: 
+
+`scrapy crawl products` 
+
+in the project's directory. Result files will be accessible in **results** folder.
 
 #### Adding brands/departments
 To add departments or brands you need to modify `BRANDS` variable in `settings.py`. 
