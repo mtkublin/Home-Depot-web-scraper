@@ -22,7 +22,7 @@ class ProductsSpider(CrawlSpider):
                   callback="parse_item",
                   follow=False),)
 
-    with open("query_string.txt", "r") as f:
+    with open("home_depot/query_string.txt", "r") as f:
         query_string = f.read()
 
     def parse_item(self, response):
