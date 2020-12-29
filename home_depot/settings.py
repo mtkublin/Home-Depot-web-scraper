@@ -61,9 +61,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    'home_depot.pipelines.HomeDepotPipeline': 300,
-# }
+ITEM_PIPELINES = {
+    'home_depot.pipelines.SaveProductsPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -86,25 +86,29 @@ ROBOTSTXT_OBEY = True
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
+BASE_URL = "https://www.homedepot.com"
 # Brands for each sub department. To extract data from additional products it is only needed to add another product in
 # one of the "brands" lists
 BRANDS = {
     "dishwashers": {
-        "base_url": "b/Appliances-Dishwashers",
+        "base_path": "b/Appliances-Dishwashers",
+        "nav_param": "N-5yc1vZc3po",
         "brands": [
             "LG-Electronics",
             "Samsung"
         ]
     },
     "refrigerators": {
-        "base_url": "b/Appliances-Refrigerators",
+        "base_path": "b/Appliances-Refrigerators",
+        "nav_param": "N-5yc1vZc3pi",
         "brands": [
             "GE",
             "Whirlpool"
         ]
     },
     "mattresses": {
-        "base_url": "b/Furniture-Bedroom-Furniture-Mattresses",
+        "base_path": "b/Furniture-Bedroom-Furniture-Mattresses",
+        "nav_param": "N-5yc1vZc7oe",
         "brands": [
             "Sealy"
         ]
