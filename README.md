@@ -53,3 +53,8 @@ To scrape data for an additional brand add its name in a specific `"brands"` lis
 
 To scrape data for additional department/sub department add another key-value pair 
 in `BRANDS`, following above schema.
+
+## TODOs
+* Modify pipeline so that items are saved to database instead of files
+* Analyze each product type's features to unify them
+* Create item objects for each product type instead of one generic ProductItem class
